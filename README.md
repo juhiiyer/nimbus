@@ -1,2 +1,2 @@
-# zenith
-Cloud Storage Tired of juggling multiple cloud accounts and running out of space?  This browser extension acts as a single control panel, unifying your Google Drive, Dropbox, OneDrive, and more. Access, search, and manage all your files in one place, effectively turning your free storage into a super-powered drive. Get more space for free.
+# NIMBUS
+Nimbus is an intelligent browser extension and a powerful backend system designed to simplify cloud storage management. It allows users to connect various cloud services like Google Drive, Dropbox, and OneDrive, providing a unified platform to optimize storage space and ensure secure, instant access to files across all linked accounts.
