@@ -163,5 +163,5 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 if __name__ == "__main__":
     create_database()
-    check_db_connection() #ONLY FOR NOW FOR CHECKING, WILL REMOVE LATER
+    check_db_connection() #ONLY FOR NOW FOR CHECKING, WILL REMOVE LATER :D
     create_db_tables()
