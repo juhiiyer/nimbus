@@ -16,35 +16,45 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 import psycopg2
 from psycopg2.errors import DuplicateDatabase
 from psycopg2 import OperationalError
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 def create_database():
     """
     Connects to the default PostgreSQL database and creates a new database
-    named 'zenithdrive' if it doesn't already exist.
+    named 'nimbusdrive' if it doesn't already exist.
     """
     
     conn = None
     try:
-        conn = psycopg2.connect(#I WILL REPLACE THIS WITH ENVIRONMENT VARIABLES LATER
+        # shriya: Replace these with your actual PostgreSQL credentials
+        db_host = os.getenv("DB_HOST", "localhost")
+        db_port = os.getenv("DB_PORT", "5433")
+        db_user = os.getenv("DB_USER", "postgres")
+        db_password = os.getenv("DB_PASSWORD", "root1234")
+        
+        conn = psycopg2.connect(
             dbname="postgres",
-            user="postgres",
-            password="root1234",
-            host="localhost",
-            port="5433"
+            user=db_user,
+            password=db_password,
+            host=db_host,
+            port=db_port
         )
 
         conn.autocommit = True
         
         cursor = conn.cursor()
         
-        sql_command = "CREATE DATABASE zenithdrive;"
+        sql_command = "CREATE DATABASE nimbusdrive;"
         
-        print("Attempting to create the database 'zenithdrive'...")
+        print("Attempting to create the database 'nimbusdrive'...")
         cursor.execute(sql_command)
-        print("Database 'zenithdrive' created successfully!")
+        print("Database 'nimbusdrive' created successfully!")
         
     except DuplicateDatabase:
-        print("Database 'zenithdrive' already exists. No action needed.")
+        print("Database 'nimbusdrive' already exists. No action needed.")
     except Exception as e:
         print(f"An error occurred: {e}")
         print("Please check your username and password in the script.")
@@ -55,28 +65,30 @@ def create_database():
 
 def check_db_connection():
     """
-    Attempts to connect to the 'zenithdrive' database to verify
+    Attempts to connect to the 'nimbusdrive' database to verify
     the connection is working.
     """
     conn = None
     try:
-        print("Attempting to connect to the 'zenithdrive' database...")
+        print("Attempting to connect to the 'nimbusdrive' database...")
+        
+        # shriya: Replace these with your actual PostgreSQL credentials
+        db_host = os.getenv("DB_HOST", "localhost")
+        db_port = os.getenv("DB_PORT", "5433")
+        db_user = os.getenv("DB_USER", "postgres")
+        db_password = os.getenv("DB_PASSWORD", "root1234")
+        
         conn = psycopg2.connect(
-            dbname="zenithdrive",
-            user="postgres",
-            password="root1234",
-            host="localhost",
-            port="5433"
+            dbname="nimbusdrive",
+            user=db_user,
+            password=db_password,
+            host=db_host,
+            port=db_port
         )
         print("Database connection successful!")
         
     except OperationalError as e:
         print(f"Connection failed: {e}")
-        print("\nPossible reasons for failure:")
-        print("1. The database server is not running.")
-        print("2. The database 'zenithdrive' does not exist.")
-        print("3. The username or password in the script is incorrect.")
-        print("Please check your database server status and credentials.")
         
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
@@ -86,9 +98,10 @@ def check_db_connection():
             conn.close()
             print("Database connection closed.")
 
-#I WILL ALSO REPLACE THIS WITH ENVIRONMENT VARIABLES LATER
+
+# shriya: Replace this connection string with your actual PostgreSQL credentials
 DATABASE_URL = os.environ.get(
-    "DATABASE_URL", "postgresql://postgres:root1234@localhost:5433/zenithdrive"
+    "DATABASE_URL", "postgresql://postgres:root1234@localhost:5433/nimbusdrive"
 )
 
 engine = create_engine(DATABASE_URL)
@@ -96,6 +109,7 @@ engine = create_engine(DATABASE_URL)
 Base = declarative_base()
 
 class User(Base):
+    
     """
     Represents the 'users' table in the PostgreSQL database.
     This table stores user profile information.
@@ -107,8 +121,12 @@ class User(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid4, unique=True
     )
     email = Column(String, unique=True, nullable=False)
+    hashed_password = Column(String, nullable=True)  # Allow null for OAuth users
     created_at = Column(
         TIMESTAMP, default=datetime.utcnow, nullable=False
+    )
+    cloud_services = relationship(
+        "UserCloudService", back_populates="user", cascade="all, delete-orphan"
     )
     cloud_services = relationship(
         "UserCloudService", back_populates="user", cascade="all, delete-orphan"
@@ -161,7 +179,15 @@ def create_db_tables():
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Dependency to get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 if __name__ == "__main__":
     create_database()
-    check_db_connection() #ONLY FOR NOW FOR CHECKING, WILL REMOVE LATER :D
+    check_db_connection()
     create_db_tables()
