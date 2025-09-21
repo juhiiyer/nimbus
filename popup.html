@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Cloud Panel</title>
+  <title>Nimbus</title>
+  <style>
+    body { font-family: Arial, sans-serif; width: 250px; padding: 10px; }
+    #searchBar { width: 100%; margin-bottom: 10px; }
+  </style>
 </head>
 <body>
-  <h2>Choose the accounts you want to link</h2>
-  <button id="googleBtn">Connect Google Drive</button>
-  <button id="dropboxBtn">Connect Dropbox</button>
-  <button id="oneDriveBtn">Connect OneDrive</button>
-
+  <input type="text" id="searchBar" placeholder="Search files..." />
+  <div id="container"></div>
   <script src="popup.js"></script>
 </body>
 </html>
