@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Nimbus link",
+  "version": "1.0",
+  "description": "A unified storage for managing Google Drive, Dropbox, OneDrive, and more — all your cloud storage in one place.",
+  "permissions": [
+    "storage",
+    "identity"
+  ],
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "host_permissions": [
+    "https://www.googleapis.com/*",
+    "https://api.dropboxapi.com/*",
+    "https://graph.microsoft.com/*"
+  ]
+}
