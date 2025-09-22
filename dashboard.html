@@ -6,7 +6,7 @@
     <title>Dashboard - NIMBUS</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen" style="background-image: url('background.png');">
     <!-- Header -->
     <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,16 +39,16 @@
             </div>
         </div>
     </header>
-
+<!------->
     <!-- Hidden File Input -->
     <input type="file" id="fileInput" multiple accept="*/*" class="hidden">
 
     <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-violet-400 bg-opacity-20  rounded-lg shadow-md p-6">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Your Files</h2>
             
-            <!-- File Grid/List Area -->
+            <!-- file grid/list Area -->
             <div id="fileArea" class="min-h-96 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                 <div class="text-center">
                     <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -67,11 +67,11 @@
                 </div>
             </div>
 
-            <!-- Uploaded Files Display -->
+            <!-- uploaded files display -->
             <div id="uploadedFiles" class="mt-6 hidden">
                 <h3 class="text-lg font-medium text-gray-800 mb-4">Uploaded Files</h3>
                 <div id="filesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- Files will be displayed here -->
+                    <!-- ifles will be displayed here -->
                 </div>
             </div>
         </div>
