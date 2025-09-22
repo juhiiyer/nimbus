@@ -6,7 +6,7 @@
     <title>Dashboard - NIMBUS</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen" style="background-image:url('background.png');">
+<body class="bg-gray-100 min-h-screen">
     <!-- Header -->
     <header class="bg-white shadow-md">
         <!DOCTYPE html>
@@ -17,8 +17,10 @@
   <title>File Upload Example</title>
 </head>
 <body>
-<input type='file' id='fileinput' style='display:none;'/>
-<button id= 'uploadbtn' ></button>
+  <!-- Your button and hidden file input -->
+  <input type="file" id="fileInput" style="display:none;" />
+  <button id="uploadBtn"></button>
+
   <script>
     document.getElementById("uploadBtn").addEventListener("click", () => {
       document.getElementById("fileInput").click(); // opens file explorer
@@ -68,7 +70,7 @@
 
     <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-purple-400 bg-opacity-20 rounded-lg shadow-md p-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Your Files</h2>
             
             <!-- File Grid/List Area -->
@@ -205,6 +207,4 @@
         });
     </script>
 </body>
-
 </html>
-
