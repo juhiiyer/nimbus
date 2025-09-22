@@ -6,8 +6,8 @@ $ErrorActionPreference = "Stop"
 
 $venvPython = Join-Path $PSScriptRoot ".venv\Scripts\python.exe"
 if (Test-Path $venvPython) {
-  & $venvPython -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+  & $venvPython -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
 } else {
   Write-Host ".venv not found. Falling back to system python."
-  python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+  python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
 }
