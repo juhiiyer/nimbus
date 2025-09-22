@@ -6,9 +6,34 @@
     <title>Dashboard - NIMBUS</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen" style="background-image: url('background.png');">
+<body class="bg-gray-100 min-h-screen">
     <!-- Header -->
     <header class="bg-white shadow-md">
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload Example</title>
+</head>
+<body>
+  <!-- Your button and hidden file input -->
+  <input type="file" id="fileInput" style="display:none;" />
+  <button id="uploadBtn">Upload</button>
+
+  <script>
+    document.getElementById("uploadBtn").addEventListener("click", () => {
+      document.getElementById("fileInput").click(); // opens file explorer
+    });
+
+    document.getElementById("fileInput").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      console.log("Selected file:", file.name);
+    });
+  </script>
+</body>
+</html>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 
@@ -39,16 +64,16 @@
             </div>
         </div>
     </header>
-<!------->
+
     <!-- Hidden File Input -->
     <input type="file" id="fileInput" multiple accept="*/*" class="hidden">
 
     <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-violet-400 bg-opacity-20  rounded-lg shadow-md p-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Your Files</h2>
             
-            <!-- file grid/list Area -->
+            <!-- File Grid/List Area -->
             <div id="fileArea" class="min-h-96 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                 <div class="text-center">
                     <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -67,11 +92,11 @@
                 </div>
             </div>
 
-            <!-- uploaded files display -->
+            <!-- Uploaded Files Display -->
             <div id="uploadedFiles" class="mt-6 hidden">
                 <h3 class="text-lg font-medium text-gray-800 mb-4">Uploaded Files</h3>
                 <div id="filesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- ifles will be displayed here -->
+                    <!-- Files will be displayed here -->
                 </div>
             </div>
         </div>
