@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./config.js"></script>
     <style>
         .mickey-background {
             position: relative;
@@ -80,8 +81,7 @@
             
             <button 
                 type="submit" 
-                class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
-                onclick="window.location.href='dashboard.html'">
+                class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
                 Login
             </button>
         </form>
@@ -100,16 +100,47 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const form = document.getElementById('loginForm');
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const username = document.getElementById('username').value;
+
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            
-            if (username && password) {
-                alert('Login functionality would be implemented here!\nUsername: ' + username);
-            } else {
+
+            if (!username || !password) {
                 alert('Please fill in both username and password fields.');
+                return;
+            }
+
+            try {
+                // FastAPI OAuth2PasswordRequestForm expects x-www-form-urlencoded with username/password
+                const body = new URLSearchParams();
+                body.append('username', username);
+                body.append('password', password);
+
+                const resp = await fetch((window.API_BASE_URL || 'http://localhost:8000') + '/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body
+                });
+
+                if (!resp.ok) {
+                    const text = await resp.text();
+                    throw new Error(`Login failed (${resp.status}): ${text}`);
+                }
+
+                const data = await resp.json();
+                // Store token for subsequent requests
+                localStorage.setItem('access_token', data.access_token);
+                localStorage.setItem('token_type', data.token_type || 'bearer');
+
+                // Navigate to dashboard
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                console.error(err);
+                alert('Login failed: ' + (err?.message || err));
             }
         });
     </script>
