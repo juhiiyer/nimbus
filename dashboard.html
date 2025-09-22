@@ -4,59 +4,342 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - NIMBUS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            background-image: url('background.png');
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .header-container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .header-container {
+                padding: 0 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .header-container {
+                padding: 0 2rem;
+            }
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 4rem;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: #9333ea;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon span {
+            color: white;
+            font-weight: bold;
+            font-size: 1.125rem;
+            font-family: 'Comic Sans MS', cursive;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+            font-family: 'Comic Sans MS', cursive;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 32rem;
+            margin: 0 2rem;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 0.75rem;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .search-icon svg {
+            height: 1.25rem;
+            width: 1.25rem;
+            color: #9ca3af;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #a855f7;
+            border-color: #a855f7;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .main-content {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .main-content {
+                padding: 2rem 2rem;
+            }
+        }
+
+        .content-wrapper {
+            background-color: rgba(196, 181, 253, 0.2);
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+
+        .content-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-area {
+            min-height: 24rem;
+            border: 2px dashed #d1d5db;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-area.drag-over {
+            border-color: #a855f7;
+            background-color: #faf5ff;
+        }
+
+        .upload-prompt {
+            text-align: center;
+        }
+
+        .upload-prompt svg {
+            margin: 0 auto;
+            height: 3rem;
+            width: 3rem;
+            color: #9ca3af;
+        }
+
+        .upload-prompt h3 {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .upload-prompt p {
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .upload-btn {
+            margin-top: 1.5rem;
+            background-color: #9333ea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .upload-btn:hover {
+            background-color: #7c3aed;
+        }
+
+        .uploaded-files {
+            margin-top: 1.5rem;
+        }
+
+        .uploaded-files h3 {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .files-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .files-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .files-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .file-card {
+            background-color: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            transition: box-shadow 0.2s;
+        }
+
+        .file-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .file-card-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .file-icon {
+            flex-shrink: 0;
+        }
+
+        .file-icon-image {
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: #dcfce7;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-icon-image svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: #16a34a;
+        }
+
+        .file-icon-document {
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: #dbeafe;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-icon-document svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: #2563eb;
+        }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #111827;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-size {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body>
     <!-- Header -->
-    <header class="bg-white shadow-md">
-        <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>File Upload Example</title>
-</head>
-<body style="background-image: url('background.png');">
-  <!-- Your button and hidden file input -->
-  <input type="file" id="fileInput" style="display:none;" />
-  <button id="uploadBtn"></button>
-
-  <script>
-    document.getElementById("uploadBtn").addEventListener("click", () => {
-      document.getElementById("fileInput").click(); // opens file explorer
-    });
-
-    document.getElementById("fileInput").addEventListener("change", (event) => {
-      const file = event.target.files[0];
-      console.log("Selected file:", file.name);
-    });
-  </script>
-</body>
-</html>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
                 
                 <!-- Logo and Name Section (Top Left) -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
-                        <span class="text-white font-bold text-lg" style="font-family: 'Comic Sans MS';">N</span>
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <span>N</span>
                     </div>
-                    <h1 class="text-xl font-bold text-gray-800" style="font-family: 'Comic Sans MS';">NIMBUS</h1>
+                    <h1 class="logo-text">NIMBUS</h1>
                 </div>
 
                 <!-- Search Bar (Middle Top) -->
-                <div class="flex-1 max-w-2xl mx-8">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="search-container">
+                    <div class="search-wrapper">
+                        <div class="search-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </div>
                         <input 
                             type="text" 
                             id="searchBar"
-                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            class="search-input"
                             placeholder="Search files, folders, or content..."
                         >
                     </div>
@@ -69,23 +352,20 @@
     <input type="file" id="fileInput" multiple accept="*/*" class="hidden">
 
     <!-- Main Content Area -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-violet-400 bg-opacity-20 rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Your Files</h2>
+    <main class="main-content">
+        <div class="content-wrapper">
+            <h2 class="content-title">Your Files</h2>
             
             <!-- File Grid/List Area -->
-            <div id="fileArea" class="min-h-96 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                <div class="text-center">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+            <div id="fileArea" class="file-area">
+                <div class="upload-prompt">
+                    <svg stroke="currentColor" fill="none" viewBox="0 0 48 48">
                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">No files uploaded</h3>
-                    <p class="mt-1 text-sm text-gray-500">Get started by uploading your first file.</p>
-                    <div class="mt-6">
-                        <button 
-                            id="uploadBtn2"
-                            class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition duration-200"
-                        >
+                    <h3>No files uploaded</h3>
+                    <p>Get started by uploading your first file.</p>
+                    <div>
+                        <button id="uploadBtn2" class="upload-btn">
                             Upload Files
                         </button>
                     </div>
@@ -93,9 +373,9 @@
             </div>
 
             <!-- Uploaded Files Display -->
-            <div id="uploadedFiles" class="mt-6 hidden">
-                <h3 class="text-lg font-medium text-gray-800 mb-4">Uploaded Files</h3>
-                <div id="filesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div id="uploadedFiles" class="uploaded-files hidden">
+                <h3>Uploaded Files</h3>
+                <div id="filesList" class="files-grid">
                     <!-- Files will be displayed here -->
                 </div>
             </div>
@@ -104,15 +384,13 @@
 
     <script>
         const fileInput = document.getElementById('fileInput');
-        const uploadBtn = document.getElementById('uploadBtn');
         const uploadBtn2 = document.getElementById('uploadBtn2');
         const fileArea = document.getElementById('fileArea');
         const uploadedFiles = document.getElementById('uploadedFiles');
         const filesList = document.getElementById('filesList');
         const searchBar = document.getElementById('searchBar');
 
-        // Upload button click handlers
-        uploadBtn.addEventListener('click', () => fileInput.click());
+        // Upload button click handler
         uploadBtn2.addEventListener('click', () => fileInput.click());
 
         // File input change handler
@@ -137,30 +415,30 @@
         // Create file card element
         function createFileCard(file) {
             const card = document.createElement('div');
-            card.className = 'bg-gray-50 p-4 rounded-lg border hover:shadow-md transition duration-200';
+            card.className = 'file-card';
             
             const isImage = file.type.startsWith('image/');
             const fileSize = (file.size / 1024).toFixed(1) + ' KB';
             
             card.innerHTML = `
-                <div class="flex items-center space-x-3">
-                    <div class="flex-shrink-0">
+                <div class="file-card-content">
+                    <div class="file-icon">
                         ${isImage ? 
-                            `<div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            `<div class="file-icon-image">
+                                <svg fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>` :
-                            `<div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            `<div class="file-icon-document">
+                                <svg fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>`
                         }
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">${file.name}</p>
-                        <p class="text-sm text-gray-500">${fileSize}</p>
+                    <div class="file-info">
+                        <p class="file-name">${file.name}</p>
+                        <p class="file-size">${fileSize}</p>
                     </div>
                 </div>
             `;
@@ -174,7 +452,7 @@
             const fileCards = filesList.children;
             
             Array.from(fileCards).forEach(card => {
-                const fileName = card.querySelector('.text-gray-900').textContent.toLowerCase();
+                const fileName = card.querySelector('.file-name').textContent.toLowerCase();
                 if (fileName.includes(searchTerm)) {
                     card.style.display = 'block';
                 } else {
@@ -186,17 +464,17 @@
         // Drag and drop functionality
         fileArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            fileArea.classList.add('border-purple-500', 'bg-purple-50');
+            fileArea.classList.add('drag-over');
         });
 
         fileArea.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            fileArea.classList.remove('border-purple-500', 'bg-purple-50');
+            fileArea.classList.remove('drag-over');
         });
 
         fileArea.addEventListener('drop', (e) => {
             e.preventDefault();
-            fileArea.classList.remove('border-purple-500', 'bg-purple-50');
+            fileArea.classList.remove('drag-over');
             
             const files = Array.from(e.dataTransfer.files);
             if (files.length > 0) {
