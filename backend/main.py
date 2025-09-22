@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 import datetime
 
 
@@ -13,8 +14,8 @@ from .utils import SECRET_KEY, ALGORITHM
 from .auth import router as auth_router
 from .services import router as services_router
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from backend/.env
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / '.env')
 
 app = FastAPI(
     title="Nimbus Backend API",
@@ -100,7 +101,13 @@ def read_root():
 @app.get("/health")
 def health_check():
     """Health check endpoint"""
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+    try:
+        ts = datetime.datetime.utcnow().isoformat()
+    except AttributeError:
+        # Fallback if datetime was imported as from datetime import datetime
+        from datetime import datetime as _dt
+        ts = _dt.utcnow().isoformat()
+    return {"status": "healthy", "timestamp": ts}
 
 @app.get("/user/services")
 def get_user_services(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):

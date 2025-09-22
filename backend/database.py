@@ -23,84 +23,60 @@ load_dotenv()
 
 def create_database():
     """
-    Connects to the default PostgreSQL database and creates a new database
-    named 'nimbusdrive' if it doesn't already exist.
+    Optional helper for local dev. Uses env vars only; does NOT hardcode credentials.
+    Set DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_NAME before using.
     """
-    
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_user = os.getenv("DB_USER")
+    db_password = os.getenv("DB_PASSWORD")
+    db_name = os.getenv("DB_NAME")
+    if not all([db_host, db_port, db_user, db_password, db_name]):
+        print("[create_database] Skipping: DB_* env vars not fully set.")
+        return
     conn = None
     try:
-        # shriya: Replace these with your actual PostgreSQL credentials
-        db_host = os.getenv("DB_HOST", "localhost")
-        db_port = os.getenv("DB_PORT", "5433")
-        db_user = os.getenv("DB_USER", "postgres")
-        db_password = os.getenv("DB_PASSWORD", "root1234")
-        
-        conn = psycopg.connect(
-            dbname="postgres",
-            user=db_user,
-            password=db_password,
-            host=db_host,
-            port=db_port
-        )
-
+        conn = psycopg.connect(dbname="postgres", user=db_user, password=db_password, host=db_host, port=db_port)
         conn.autocommit = True
-        
         with conn.cursor() as cursor:
-            sql_command = "CREATE DATABASE nimbusdrive;"
-            print("Attempting to create the database 'nimbusdrive'...")
-            cursor.execute(sql_command)
-            print("Database 'nimbusdrive' created successfully!")
-        
+            cursor.execute(f"CREATE DATABASE {db_name};")
+            print(f"Database '{db_name}' created successfully!")
     except DuplicateDatabase:
-        print("Database 'nimbusdrive' already exists. No action needed.")
+        print(f"Database '{db_name}' already exists. No action needed.")
     except Exception as e:
-        print(f"An error occurred: {e}")
-        print("Please check your username and password in the script.")
+        print(f"[create_database] Error: {e}")
     finally:
         if conn:
             conn.close()
 
-
 def check_db_connection():
-    """
-    Attempts to connect to the 'nimbusdrive' database to verify
-    the connection is working.
-    """
+    """Optional helper to quickly test DB connectivity using DB_* env vars."""
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_user = os.getenv("DB_USER")
+    db_password = os.getenv("DB_PASSWORD")
+    db_name = os.getenv("DB_NAME")
+    if not all([db_host, db_port, db_user, db_password, db_name]):
+        print("[check_db_connection] Skipping: DB_* env vars not fully set.")
+        return
     conn = None
     try:
-        print("Attempting to connect to the 'nimbusdrive' database...")
-        
-        # shriya: Replace these with your actual PostgreSQL credentials
-        db_host = os.getenv("DB_HOST", "localhost")
-        db_port = os.getenv("DB_PORT", "5433")
-        db_user = os.getenv("DB_USER", "postgres")
-        db_password = os.getenv("DB_PASSWORD", "root1234")
-        
-        conn = psycopg.connect(
-            dbname="nimbusdrive",
-            user=db_user,
-            password=db_password,
-            host=db_host,
-            port=db_port
-        )
+        print(f"Attempting to connect to '{db_name}'...")
+        conn = psycopg.connect(dbname=db_name, user=db_user, password=db_password, host=db_host, port=db_port)
         print("Database connection successful!")
-        
     except OperationalError as e:
         print(f"Connection failed: {e}")
-        
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        
+        print(f"Unexpected error: {e}")
     finally:
         if conn:
             conn.close()
             print("Database connection closed.")
 
-
-# shriya: Replace this connection string with your actual PostgreSQL credentials
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL", "postgresql+psycopg://postgres:root1234@localhost:5433/nimbusdrive"
-)
+# Read DATABASE_URL only from environment (no hardcoded credentials)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set. Add it to backend/.env")
 
 engine = create_engine(DATABASE_URL)
 

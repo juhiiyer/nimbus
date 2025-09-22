@@ -4,17 +4,23 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
+from pathlib import Path
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from backend/.env
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / '.env')
 
-# shriya: Replace with a strong secret key for JWT
-SECRET_KEY = os.getenv("SECRET_KEY", "d10485f77dc22f1c6bcfac290a51297d63a8d2f9f736f6efa02bef33d5ae33cb")
+# Security configuration (must come from environment only)
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+FERNET_KEY_ENV = os.getenv("FERNET_KEY")
 
-# shriya: Generate a key with Fernet.generate_key() and replace this
-FERNET_KEY = os.getenv("FERNET_KEY", "Pv1cUqRu61maqc1cKFOxrBXwok9SRe6IpdCVZmHoKlI=").encode()
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not set. Add it to backend/.env")
+if not FERNET_KEY_ENV:
+    raise RuntimeError("FERNET_KEY is not set. Generate one with Fernet.generate_key() and add to backend/.env")
+
+FERNET_KEY = FERNET_KEY_ENV.encode()
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
