@@ -4,10 +4,10 @@ import requests
 from datetime import datetime, timedelta
 import os
 
-from backend.database import get_db, UserCloudService
-from backend.schemas import UploadURLRequest, UploadURLResponse, DownloadURLRequest, DownloadURLResponse
-from backend.utils import decrypt_token, validate_token_expiry, encrypt_token
-from backend.auth import get_current_user
+from .database import get_db, UserCloudService
+from .schemas import UploadURLRequest, UploadURLResponse, DownloadURLRequest, DownloadURLResponse
+from .utils import decrypt_token, validate_token_expiry, encrypt_token
+from .auth import get_current_user
 
 # Create the router instance
 router = APIRouter(prefix="/services", tags=["services"])

@@ -8,10 +8,10 @@ from dotenv import load_dotenv
 import datetime
 
 
-from backend.database import get_db, User, create_db_tables
-from backend.utils import SECRET_KEY, ALGORITHM
-from backend.auth import router as auth_router
-from backend.services import router as services_router
+from .database import get_db, User, create_db_tables
+from .utils import SECRET_KEY, ALGORITHM
+from .auth import router as auth_router
+from .services import router as services_router
 
 # Load environment variables
 load_dotenv()
@@ -20,8 +20,8 @@ load_dotenv()
 create_db_tables()
 
 app = FastAPI(
-    title="Zenith Backend API",
-    description="Backend for Zenith Cloud Storage Manager Extension",
+    title="Nimbus Backend API",
+    description="Backend for Nimbus Cloud Storage Manager Extension",
     version="1.0.0"
 )
 
@@ -74,7 +74,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 def read_root():
     """Root endpoint - API information"""
     return {
-        "message": "Zenith Backend API",
+        "message": "Nimbus Backend API",
         "version": "1.0.0",
         "documentation": "/docs",
         "endpoints": {
@@ -100,7 +100,7 @@ def health_check():
 @app.get("/user/services")
 def get_user_services(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     """Get all connected cloud services for the current user"""
-    from backend.database import UserCloudService
+    from .database import UserCloudService
     services = db.query(UserCloudService).filter(
         UserCloudService.user_id == current_user.user_id,
         UserCloudService.is_active == True

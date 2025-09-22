@@ -10,9 +10,9 @@ import secrets
 import json
 from jose import JWTError, jwt  # Added JWTError and jwt
 
-from backend.database import get_db, User, UserCloudService
-from backend.schemas import UserCreate, UserOut, Token
-from backend.utils import (
+from .database import get_db, User, UserCloudService
+from .schemas import UserCreate, UserOut, Token
+from .utils import (
     get_password_hash, verify_password, create_access_token, 
     encrypt_token, decrypt_token, validate_token_expiry,
     SECRET_KEY, ALGORITHM  # Added SECRET_KEY and ALGORITHM
