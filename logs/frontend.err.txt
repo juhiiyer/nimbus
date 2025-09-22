@@ -1,3 +1,14 @@
-::1 - - [23/Sep/2025 01:44:54] "GET /login.html HTTP/1.1" 200 -
-::1 - - [23/Sep/2025 01:45:08] "GET /login.html HTTP/1.1" 200 -
-::1 - - [23/Sep/2025 01:45:08] "GET /api.js HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:23:26] "GET /login.html HTTP/1.1" 200 -
+::1 - - [23/Sep/2025 02:25:01] "GET /signup.html HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:27:33] "GET /api.js HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:30:40] "GET /connections.html HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:35:33] "GET /config.js HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:38:54] "GET /oauth-callback.html HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:38:54] "GET /dashboard.html HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:38:54] "GET /api.js HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:38:54] "GET /db.js HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:41:02] code 404, message File not found
+::1 - - [23/Sep/2025 02:41:02] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 -
+::1 - - [23/Sep/2025 02:50:51] "GET /connections.html HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:50:51] "GET /api.js HTTP/1.1" 304 -
+::1 - - [23/Sep/2025 02:51:37] "GET /dashboard.html HTTP/1.1" 304 -
