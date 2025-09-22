@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./config.js"></script>
+    <script src="./api.js"></script>
+    
+</head>
+<body class="bg-purple-300 min-h-screen flex items-center justify-center" style ="background-image: url('background.png');">
+    <div class="bg-violet-700 bg-opacity-60 p-8 rounded-lg shadow-md w-full max-w-md bg-cover bg-center bg-no-repeat">
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold text-white mb-5" style="font-family: 'Comic Sans MS';"> NIMBUS </h1>
+            <h2 class="text-2xl font-bold text-white">Log in</h2>
+        </div>
+        
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="username" class="block text-sm font-medium text-white mb-2">
+                    Username:
+                </label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required
+                    class="w-full px-3 py-2 border border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Username"
+                >
+            </div>
+            
+            <div>
+                <label for="password" class="block text-sm font-medium text-white mb-2">
+                    Password:
+                </label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required
+                    class="w-full px-3 py-2 border border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Password"
+                >
+            </div>
+            
+            <button 
+                type="submit" 
+                class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                Login
+            </button>
+        </form>
+        
+        <div class="text-center mt-6">
+            <a href="#" class="text-sm text-white hover:text-white hover:underline">
+                Forgot Password?
+            </a>
+        </div>
+        <p class="text-sm text-center text-white mt-3"> Don't have an account? </p>
+        <div class="text-center mt-3">
+            <a href="./signup.html" class="text-sm text-white hover:text-white hover:underline">
+                sign up
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (!email || !password) {
+                alert('Please fill in both email and password.');
+                return;
+            }
+            try {
+                await window.NimbusAPI.login(email, password);
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                alert('Login failed: ' + (err?.message || err));
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
