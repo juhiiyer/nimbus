@@ -13,9 +13,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
-import psycopg2
-from psycopg2.errors import DuplicateDatabase
-from psycopg2 import OperationalError
+import psycopg
+from psycopg import OperationalError
+from psycopg.errors import DuplicateDatabase
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -35,7 +35,7 @@ def create_database():
         db_user = os.getenv("DB_USER", "postgres")
         db_password = os.getenv("DB_PASSWORD", "root1234")
         
-        conn = psycopg2.connect(
+        conn = psycopg.connect(
             dbname="postgres",
             user=db_user,
             password=db_password,
@@ -45,13 +45,11 @@ def create_database():
 
         conn.autocommit = True
         
-        cursor = conn.cursor()
-        
-        sql_command = "CREATE DATABASE nimbusdrive;"
-        
-        print("Attempting to create the database 'nimbusdrive'...")
-        cursor.execute(sql_command)
-        print("Database 'nimbusdrive' created successfully!")
+        with conn.cursor() as cursor:
+            sql_command = "CREATE DATABASE nimbusdrive;"
+            print("Attempting to create the database 'nimbusdrive'...")
+            cursor.execute(sql_command)
+            print("Database 'nimbusdrive' created successfully!")
         
     except DuplicateDatabase:
         print("Database 'nimbusdrive' already exists. No action needed.")
@@ -78,7 +76,7 @@ def check_db_connection():
         db_user = os.getenv("DB_USER", "postgres")
         db_password = os.getenv("DB_PASSWORD", "root1234")
         
-        conn = psycopg2.connect(
+        conn = psycopg.connect(
             dbname="nimbusdrive",
             user=db_user,
             password=db_password,
@@ -101,7 +99,7 @@ def check_db_connection():
 
 # shriya: Replace this connection string with your actual PostgreSQL credentials
 DATABASE_URL = os.environ.get(
-    "DATABASE_URL", "postgresql://postgres:root1234@localhost:5433/nimbusdrive"
+    "DATABASE_URL", "postgresql+psycopg://postgres:root1234@localhost:5433/nimbusdrive"
 )
 
 engine = create_engine(DATABASE_URL)

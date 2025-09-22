@@ -16,14 +16,19 @@ from .services import router as services_router
 # Load environment variables
 load_dotenv()
 
-# Create database tables
-create_db_tables()
-
 app = FastAPI(
     title="Nimbus Backend API",
     description="Backend for Nimbus Cloud Storage Manager Extension",
     version="1.0.0"
 )
+
+# Create database tables on startup (do not hard-fail if DB is unavailable)
+@app.on_event("startup")
+async def _startup_db():
+    try:
+        create_db_tables()
+    except Exception as e:
+        print(f"[WARN] Could not create DB tables at startup: {e}")
 
 # Configure CORS for frontend and extension integration
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
