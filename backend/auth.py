@@ -119,10 +119,11 @@ def google_login():
     """Redirect user to Google OAuth consent screen using PKCE"""
     if not GOOGLE_CLIENT_ID:
         raise HTTPException(status_code=500, detail="GOOGLE_CLIENT_ID not configured")
+    # Generate PKCE pair and state
+    code_verifier, code_challenge = generate_pkce_codes()
     state = secrets.token_urlsafe(16)
     
     auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
-    state = secrets.token_urlsafe(16)
     params = {
         "client_id": GOOGLE_CLIENT_ID,
         "redirect_uri": GOOGLE_REDIRECT_URI,
