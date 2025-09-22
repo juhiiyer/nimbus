@@ -14,20 +14,6 @@
         
         <form id="signupForm" class="space-y-6">
             <div>
-                <label for="username" class="block text-sm font-medium text-white mb-2">
-                    Username
-                </label>
-                <input 
-                    type="text" 
-                    id="username" 
-                    name="username" 
-                    required
-                    class="w-full px-3 py-2 border border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Choose a username"
-                >
-            </div>
-
-            <div>
                 <label for="email" class="block text-sm font-medium text-white mb-2">
                     Email
                 </label>
@@ -40,8 +26,6 @@
                     placeholder="Enter your email"
                 >
             </div>
-            
-
             
             <div>
                 <label for="password" class="block text-sm font-medium text-white mb-2">
@@ -73,8 +57,7 @@
             
             <button 
                 type="submit" 
-                class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
-                onclick="window.location.href='connections.html'">
+                class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
                 Sign Up
             </button>
         </form>
@@ -88,12 +71,11 @@
     </div>
 
     <script>
-        document.getElementById('signupForm').addEventListener('submit', function(e) {
+        const API_BASE = (window.API_BASE_URL || 'http://localhost:8000');
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const fullname = document.getElementById('fullname').value;
-            const email = document.getElementById('email').value;
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
@@ -101,11 +83,20 @@
                 alert('Passwords do not match!');
                 return;
             }
-            
-            if (fullname && email && username && password && confirmPassword) {
-                alert('Sign up functionality would be implemented here!\nName: ' + fullname + '\nEmail: ' + email + '\nUsername: ' + username);
-            } else {
-                alert('Please fill in all fields.');
+            try {
+                const resp = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.detail || 'Sign up failed');
+                localStorage.setItem('access_token', data.access_token);
+                localStorage.setItem('token_type', data.token_type || 'bearer');
+                window.location.href = 'connections.html';
+            } catch (err) {
+                console.error(err);
+                alert(err.message || err);
             }
         });
     </script>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connections</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./config.js"></script>
 </head>
 <body class="bg-purple-300 min-h-screen flex items-center justify-center">
     <div class="bg-purple-400 p-8 rounded-lg shadow-md w-full max-w-2xl">
@@ -27,7 +28,7 @@
                             placeholder="Enter your OneDrive email"
                         >
                     </div>
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">
+                    <button id="connect-onedrive" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">
                         Connect OneDrive
                     </button>
                 </div>
@@ -46,38 +47,90 @@
                             placeholder="Google account"
                         >
                     </div>
-                    <button class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">
-                        Connect Google Drive
+                    <div class="space-x-2">
+                        <button id="connect-google-pkce" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">
+                            Connect Google Drive
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Dropbox Section -->
+            <div class="bg-white bg-opacity-20 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold text-white mb-4">Dropbox</h2>
+                <div class="space-y-4">
+                    <div>
+                        <input 
+                            type="email" 
+                            id="dropbox-account" 
+                            name="dropbox-account" 
+                            class="w-full px-3 py-2 border border-purple-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                            placeholder="Dropbox account (optional)"
+                        >
+                    </div>
+                    <button id="connect-dropbox" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-200">
+                        Connect Dropbox
                     </button>
                 </div>
             </div>
         </div>
         
-        <div class="text-center mt-8">
+        <div class="text-center mt-8 space-x-4">
             <a href="login.html" class="text-sm text-purple-100 hover:text-white hover:underline">
                 Back to Login
+            </a>
+            <a href="dashboard.html" class="text-sm text-white bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded">
+                Done
             </a>
         </div>
     </div>
 
     <script>
-        // OneDrive connection
-        document.querySelector('button:nth-of-type(1)').addEventListener('click', function() {
+        const API_BASE = (window.API_BASE_URL || 'http://localhost:8000');
+
+        // OneDrive (placeholder)
+        document.getElementById('connect-onedrive').addEventListener('click', function() {
             const onedriveAccount = document.getElementById('onedrive-account').value;
-            if (onedriveAccount) {
-                alert('OneDrive connection would be implemented here!\nAccount: ' + onedriveAccount);
-            } else {
+            if (!onedriveAccount) {
                 alert('Please enter your OneDrive account email.');
+                return;
+            }
+            alert('OneDrive OAuth is not implemented yet in this UI. Use Google Drive below.');
+        });
+
+
+        // Google via Web Redirect (PKCE)
+        document.getElementById('connect-google-pkce').addEventListener('click', async function() {
+            try {
+                const resp = await fetch(`${API_BASE}/auth/google/login`);
+                if (!resp.ok) {
+                    const t = await resp.text();
+                    throw new Error(`Failed to initiate Google OAuth (${resp.status}): ${t}`);
+                }
+                const data = await resp.json();
+                if (!data.auth_url) throw new Error('Backend did not return an auth_url');
+                window.location.href = data.auth_url;
+            } catch (err) {
+                console.error(err);
+                alert('Could not start Google OAuth: ' + (err?.message || err));
             }
         });
 
-        // Google Drive connection
-        document.querySelector('button:nth-of-type(2)').addEventListener('click', function() {
-            const googledriveAccount = document.getElementById('googledrive-account').value;
-            if (googledriveAccount) {
-                alert('Google Drive connection would be implemented here!\nAccount: ' + googledriveAccount);
-            } else {
-                alert('Please enter your Google account email.');
+        // Dropbox -> fetch backend auth URL and redirect to Dropbox consent screen
+        document.getElementById('connect-dropbox').addEventListener('click', async function() {
+            try {
+                const resp = await fetch(`${API_BASE}/auth/dropbox/login`);
+                if (!resp.ok) {
+                    const text = await resp.text();
+                    throw new Error(`Failed to initiate Dropbox OAuth (${resp.status}): ${text}`);
+                }
+                const data = await resp.json();
+                if (!data.auth_url) {
+                    throw new Error('Backend did not return an auth_url');
+                }
+                window.location.href = data.auth_url;
+            } catch (err) {
+                console.error(err);
+                alert('Could not start Dropbox OAuth: ' + (err?.message || err));
             }
         });
     </script>

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - NIMBUS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./config.js"></script>
+    <script src="./idb.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <!-- Header -->
@@ -56,13 +58,19 @@
                     </svg>
                     <h3 class="mt-2 text-sm font-medium text-gray-900">No files uploaded</h3>
                     <p class="mt-1 text-sm text-gray-500">Get started by uploading your first file.</p>
-                    <div class="mt-6">
+                    <div class="mt-6 space-x-2">
+                        <select id="uploadService" class="border rounded px-2 py-1 text-sm">
+                            <option value="auto">Auto (most space)</option>
+                            <option value="dropbox">Dropbox</option>
+                            <option value="google_drive">Google Drive</option>
+                        </select>
                         <button 
                             id="uploadBtn2"
                             class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition duration-200"
                         >
-                            Upload Files
+                            Upload File
                         </button>
+                        <span id="indexProgress" class="text-xs text-gray-500 ml-2"></span>
                     </div>
                 </div>
             </div>
@@ -78,45 +86,128 @@
     </main>
 
     <script>
+        const API_BASE = (window.API_BASE_URL || 'http://localhost:8000');
+        const token = localStorage.getItem('access_token');
+        const tokenType = localStorage.getItem('token_type') || 'bearer';
+        const provider = localStorage.getItem('provider') || 'dropbox';
+
         const fileInput = document.getElementById('fileInput');
         const uploadBtn = document.getElementById('uploadBtn');
         const uploadBtn2 = document.getElementById('uploadBtn2');
+        const uploadService = document.getElementById('uploadService');
+        const indexProgress = document.getElementById('indexProgress');
         const fileArea = document.getElementById('fileArea');
         const uploadedFiles = document.getElementById('uploadedFiles');
         const filesList = document.getElementById('filesList');
         const searchBar = document.getElementById('searchBar');
 
-        // Upload button click handlers
-        uploadBtn.addEventListener('click', () => fileInput.click());
-        uploadBtn2.addEventListener('click', () => fileInput.click());
+        async function fetchConnectedServices() {
+            if (!token) return [];
+            try {
+                const resp = await fetch(`${API_BASE}/user/services`, { headers: { 'Authorization': `${tokenType} ${token}` } });
+                if (!resp.ok) return [];
+                const data = await resp.json();
+                return (data.services || []).filter(s => s.is_active).map(s => s.service_name);
+            } catch { return []; }
+        }
 
-        // File input change handler
+        async function populateUploadTargets() {
+            const svcs = await fetchConnectedServices();
+            uploadService.innerHTML = '';
+            if (svcs.length === 0) {
+                indexProgress.textContent = 'No connected clouds. Go to Connections to link Google Drive or Dropbox.';
+                const a = document.createElement('a');
+                a.href = 'connections.html';
+                a.className = 'text-purple-600 underline ml-2';
+                a.textContent = 'Connect now';
+                indexProgress.appendChild(a);
+                return;
+            }
+            if (svcs.length > 1) {
+                const opt = document.createElement('option');
+                opt.value = 'auto'; opt.textContent = 'Auto (most space)';
+                uploadService.appendChild(opt);
+            }
+            for (const s of svcs) {
+                const opt = document.createElement('option');
+                opt.value = s; opt.textContent = (s === 'google_drive') ? 'Google Drive' : 'Dropbox';
+                uploadService.appendChild(opt);
+            }
+        }
+
+        // Upload button click handlers (local preview only)
+        if (uploadBtn) uploadBtn.addEventListener('click', () => fileInput.click());
+        uploadBtn2.addEventListener('click', async () => {
+            // Always allow picking a file; we will guide the user after selection if no service exists
+            fileInput.onchange = async (e) => {
+                const f = e.target.files[0];
+                if (!f) return;
+                try {
+                    const fd = new FormData();
+                    fd.append('service', uploadService?.value || 'auto');
+                    fd.append('file', f, f.name);
+                    const resp = await fetch(`${API_BASE}/services/upload-simple`, {
+                        method: 'POST',
+                        headers: token ? { 'Authorization': `${tokenType} ${token}` } : {},
+                        body: fd
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok) {
+                        let msg = 'Upload failed';
+                        const d = data?.detail ?? data;
+                        if (typeof d === 'string') {
+                            msg = d;
+                        } else if (d && typeof d === 'object') {
+                            msg = d.message || JSON.stringify(d);
+                        }
+                        // If the backend says there are no connected services, guide user to connections
+                        if (typeof d === 'string' && d.toLowerCase().includes('no connected services')) {
+                            alert('No connected cloud services. Please connect Dropbox or Google Drive first.');
+                            window.location.href = 'connections.html';
+                            return;
+                        }
+                        throw new Error(msg);
+                    }
+                    // Upsert into IndexedDB with accurate identifiers
+                    await NimbusDB.upsertFiles([{ id: data.id || data.filename, name: data.filename, size: data.size, service: data.service, path: data.path || null }]);
+                    alert('Uploaded to ' + data.service + ': ' + data.filename);
+                } catch (err) {
+                    console.error('Upload error:', err);
+                    try {
+                        alert(err?.message || JSON.stringify(err));
+                    } catch {
+                        alert(String(err));
+                    }
+                } finally {
+                    fileInput.value = '';
+                }
+            };
+            fileInput.click();
+        });
+
+        // File input change handler (local preview only)
         fileInput.addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             if (files.length > 0) {
-                displayFiles(files);
+                displayLocalFiles(files);
                 fileArea.classList.add('hidden');
                 uploadedFiles.classList.remove('hidden');
             }
         });
 
-        // Display uploaded files
-        function displayFiles(files) {
+        function displayLocalFiles(files) {
             filesList.innerHTML = '';
             files.forEach(file => {
-                const fileCard = createFileCard(file);
+                const fileCard = createLocalFileCard(file);
                 filesList.appendChild(fileCard);
             });
         }
 
-        // Create file card element
-        function createFileCard(file) {
+        function createLocalFileCard(file) {
             const card = document.createElement('div');
             card.className = 'bg-gray-50 p-4 rounded-lg border hover:shadow-md transition duration-200';
-            
             const isImage = file.type.startsWith('image/');
             const fileSize = (file.size / 1024).toFixed(1) + ' KB';
-            
             card.innerHTML = `
                 <div class="flex items-center space-x-3">
                     <div class="flex-shrink-0">
@@ -139,43 +230,148 @@
                     </div>
                 </div>
             `;
-            
             return card;
         }
 
-        // Search functionality
-        searchBar.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const fileCards = filesList.children;
-            
-            Array.from(fileCards).forEach(card => {
-                const fileName = card.querySelector('.text-gray-900').textContent.toLowerCase();
-                if (fileName.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
+        // Remote search against Dropbox via backend
+        async function searchRemote(term) {
+            if (!token) return;
+            const resp = await fetch(`${API_BASE}/services/search?service=${encodeURIComponent(provider)}&q=${encodeURIComponent(term)}`, {
+                headers: { 'Authorization': `${tokenType} ${token}` }
             });
+            if (!resp.ok) {
+                const text = await resp.text();
+                throw new Error(`Search failed (${resp.status}): ${text}`);
+            }
+            const data = await resp.json();
+            const items = data.items || [];
+            filesList.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 p-4 rounded-lg border hover:shadow-md transition duration-200';
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">${item.name || item.path}</p>
+                            <p class="text-sm text-gray-500">${item.path || ''}</p>
+                        </div>
+                    </div>`;
+                filesList.appendChild(card);
+            });
+            fileArea.classList.add('hidden');
+            uploadedFiles.classList.remove('hidden');
+        }
+
+        // Debounced search input; first search locally via IndexedDB, then optionally remote
+        let debounceId;
+        searchBar.addEventListener('input', function(e) {
+            const term = e.target.value.trim();
+            clearTimeout(debounceId);
+            debounceId = setTimeout(async () => {
+                if (!term) return;
+                // Local search
+                try {
+                    const local = await NimbusDB.searchByName(term);
+                    renderLocalResults(local);
+                } catch {}
+                // Optional remote augmentation if we have token
+                if (token) {
+                    searchRemote(term).catch(err => console.error(err));
+                }
+            }, 300);
         });
 
-        // Drag and drop functionality
+        function renderLocalResults(items) {
+            filesList.innerHTML = '';
+            (items || []).forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 p-4 rounded-lg border hover:shadow-md transition duration-200';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">${item.name}</p>
+                            <p class="text-xs text-gray-500">${item.service}${item.path ? ' • ' + item.path : ''}</p>
+                        </div>
+                        <button class="text-purple-600 text-sm underline download-btn" data-service="${item.service}" data-id="${item.id || ''}" data-path="${item.path || ''}">Download</button>
+                    </div>`;
+                filesList.appendChild(card);
+            });
+            fileArea.classList.add('hidden');
+            uploadedFiles.classList.remove('hidden');
+            // Bind download buttons
+            for (const btn of filesList.querySelectorAll('.download-btn')) {
+                btn.addEventListener('click', async (e) => {
+                    const svc = e.currentTarget.getAttribute('data-service');
+                    const idAttr = e.currentTarget.getAttribute('data-id');
+                    const pathAttr = e.currentTarget.getAttribute('data-path');
+                    const fid = (svc === 'dropbox') ? pathAttr : idAttr;
+                    try {
+                        // Use backend streaming endpoint so Google works without public links
+                        const dl = `${API_BASE}/services/download?service=${encodeURIComponent(svc)}&file_id=${encodeURIComponent(fid)}`;
+                        window.open(dl, '_blank');
+                    } catch (err) { alert(err.message || err); }
+                });
+            }
+        }
+
+        // Populate upload targets on load
+        populateUploadTargets();
+
+        // Initial indexing after OAuth (fetch metadata and store locally)
+        (async function initialIndex() {
+            if (!token) return; // not logged in
+            indexProgress.textContent = 'Indexing…';
+            try {
+                // Get active services for the user
+                let activeServices = ['dropbox', 'google_drive'];
+                try {
+                    const resp = await fetch(`${API_BASE}/user/services`, { headers: { 'Authorization': `${tokenType} ${token}` } });
+                    const data = await resp.json();
+                    if (resp.ok && Array.isArray(data.services)) {
+                        activeServices = data.services.filter(s => s.is_active).map(s => s.service_name);
+                    }
+                } catch {}
+                // Iterate services and index a few pages each
+                for (const svc of activeServices) {
+                    try {
+                        let next = null; let pages = 0;
+                        do {
+                            const url = new URL(`${API_BASE}/services/list`);
+                            url.searchParams.set('service', svc);
+                            if (svc === 'dropbox' && next) url.searchParams.set('cursor', next);
+                            if (svc === 'google_drive' && next) url.searchParams.set('page_token', next);
+                            const resp = await fetch(url.toString(), { headers: { 'Authorization': `${tokenType} ${token}` } });
+                            if (!resp.ok) break;
+                            const data = await resp.json();
+                            await NimbusDB.upsertFiles(data.items || []);
+                            next = data.next || null;
+                            pages++;
+                            indexProgress.textContent = `Indexed ${pages} page(s) from ${svc}…`;
+                        } while (next && pages < 10);
+                    } catch (e) { console.warn('Index for', svc, 'failed', e); }
+                }
+                indexProgress.textContent = 'Index complete';
+            } catch (e) {
+                console.error('Indexing failed', e);
+                indexProgress.textContent = 'Indexing failed';
+            }
+        })();
+
+        // Drag and drop preview (unchanged)
         fileArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             fileArea.classList.add('border-purple-500', 'bg-purple-50');
         });
-
         fileArea.addEventListener('dragleave', (e) => {
             e.preventDefault();
             fileArea.classList.remove('border-purple-500', 'bg-purple-50');
         });
-
         fileArea.addEventListener('drop', (e) => {
             e.preventDefault();
             fileArea.classList.remove('border-purple-500', 'bg-purple-50');
-            
             const files = Array.from(e.dataTransfer.files);
             if (files.length > 0) {
-                displayFiles(files);
+                displayLocalFiles(files);
                 fileArea.classList.add('hidden');
                 uploadedFiles.classList.remove('hidden');
             }
